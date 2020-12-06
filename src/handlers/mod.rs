@@ -1,12 +1,22 @@
-use actix_web::HttpResponse;
-use actix_web::{web, web::ServiceConfig};
+mod auth;
+mod user;
 
-pub fn app_config(config: &mut ServiceConfig) {
-    let health_resource = web::resource("/").route(web::get().to(health));
+use crate::errors::AppError;
+use actix_web::{web, HttpResponse};
+use auth::auth;
+use user::{create_user, me, update_profile};
 
-    config.service(health_resource);
-}
+type AppResult<T> = Result<T, AppError>;
+type AppResponse = AppResult<HttpResponse>;
 
-pub async fn health() -> HttpResponse {
-    HttpResponse::Ok().finish()
+pub fn app_config(config: &mut web::ServiceConfig) {
+    let signup = web::resource("/signup").route(web::post().to(create_user));
+
+    let auth = web::resource("/auth").route(web::post().to(auth));
+
+    let me = web::resource("/me")
+        .route(web::get().to(me))
+        .route(web::post().to(update_profile));
+
+    config.service(signup).service(auth).service(me);
 }

@@ -3,6 +3,7 @@ extern crate validator_derive;
 
 mod config;
 mod db;
+mod errors;
 mod handlers;
 mod models;
 
